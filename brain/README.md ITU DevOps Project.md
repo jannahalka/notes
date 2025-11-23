@@ -1,8 +1,14 @@
 # ITU BDS MLOPS'25 - Project
-This project is a submission for MLOPS final project.
-Authors: Jan Nahalka & Oliver Souc
 
-## Project Organization
+## 📝 About the Project
+This project is a submission for the **ITU BDS MLOPS'25** final exam. It demonstrates the transformation of a raw, experimental Jupyter notebook into a production-ready MLOps pipeline.
+
+**The Machine Learning Objective** The goal of the underlying model is to identify website users who are potential new customers. By analyzing user behavior data, the model performs a **binary classification** to predict whether a specific user will convert (turn into a customer).
+
+**The Engineering Objective** The original codebase consisted of a monolithic notebook containing data processing, training, and "fluff" (unused code/comments). This project refactors that source into a clean, modularized structure following PEP 8 standards. It implements a full automation pipeline using **Dagger**, **DVC** for data versioning, and **MLFlow** for experiment tracking and model selection.
+
+## 🗄️ Project Organization
+
 ```
 .
 ├── .github
@@ -44,10 +50,11 @@ Authors: Jan Nahalka & Oliver Souc
         ├── selection.py
         └── train.py
 ```
-## Installation
+
+## 🚀 Installation
 > Make sure you have [Go](https://go.dev/doc/install), [Python](https://www.python.org/downloads/), and [dvc](https://doc.dvc.org/install) already installed on your machine.
 
-To start out using the project, clone the repository and follow the these steps:
+To start out using the project, clone the repository and follow these steps:
 ```bash
 # 1. Create virtual environment
 make create_environment
@@ -55,7 +62,7 @@ make create_environment
 # 2. Activate virtual environment
 workon itu-sdse-project
 
-# 3. Install dependecies
+# 3. Install dependencies
 make requirements
 
 # 4. Pull raw data (Optional for dagger workflow)
@@ -64,14 +71,61 @@ raw_data.csv -o data/raw
 ```
 
 ## 📚 Documentation
-In this project we split Jupyter notebook located in `notebooks/main.ipynb` into manageable, clean and easy to read code throughout the codebase.
+In this project, we split the Jupyter notebook located in `notebooks/main.ipynb` into manageable, clean, and easy-to-read code throughout the codebase.
 
 First we tackled the data cleaning part of the notebook, where we placed data generation into `make_dataset.py` files inside the `data/` directory.
 
-## Usage
+Training code in the Jupyter notebook file was structured inconsistently, so we decided to refactor it significantly. Starting off, the `xgboost` model was included in our MLFlow setup. The Logistic Regression model was already utilizing MLFlow, so we followed the code in the Logistic Regression notebook cell and recreated it in the `xgboost` portion of the code.
 
+After the training code, we implemented the functionality of selecting the best-performing model after training runs have finished. For this process, we decided to refactor the code in the notebook to use strictly MLFlow for the performance data of our trained models.
 
-## Project requirements checklist
+## ⚙️ Commands & Options
+### `train.py`
+Trains a classification model using the dataset found in `data/processed/`.
+
+```bash
+python itu_sdse_project/modeling/train.py <log-reg|xgboost> [options]
+```
+
+| Argument | Required | Description                         |
+| -------- | -------- | ----------------------------------- |
+| log-reg  | true     | Trains a Logistic Regression model. |
+| xgboost  | true     | Trains an XGBoost Classifier.       |
+
+### `select.py`
+Selects the best performing model from training runs and registers it as staging in MLFlow.
+
+```bash
+python itu_sdse_project/modeling/select.py
+```
+
+### `features.py`
+Creates datasets for model training.
+
+```bash
+python itu_sdse_project/features.py
+```
+
+## 🤖 Dagger Automation
+![[Pasted image 20251123132816.png]]
+
+### `BuildEnv`
+Builds the environment using `python:3.12.2-bookworm` Docker image, installs python dependencies, dvc, and pulls raw data.
+
+### `PrepareData`
+Cleans the raw data and splits the cleaned data into processed `features.csv` and `labels.csv` files.
+
+### `Train`
+Trains the models `log-reg` and `xgboost`.
+
+### `Select`
+Selects the model with the highest f1-score from all training runs, and registers it into staging phase.
+
+### `Download`
+Downloads the best performing model as a `model.pkl` artifact.
+
+## ✅ Project requirements checklist
+- [x] Remove unused code and misleading comments
 - [x] Usage of Git
 - [x] Usage of PRs
 - [x] Decomposition of the notebook
@@ -83,6 +137,8 @@ First we tackled the data cleaning part of the notebook, where we placed data ge
 - [x] Orchestration of dagger workflow through gh actions
 
 ## Todos - NOT PART OF README.md
+- Asserts in the project
+	- In `features.py` check if the path for cleaned data exists.
 
 ### TODO: General logging for the project
 Throughout the project we have tasks like training, cleaning data, selecting best performing model, etc. All of that should come with logging, which will enhance developer experience, while running and debugging various scripts.
