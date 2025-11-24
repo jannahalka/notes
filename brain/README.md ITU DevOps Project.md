@@ -69,6 +69,9 @@ make requirements
 dvc get https://github.com/Jeppe-T-K/itu-sdse-project-data \
 raw_data.csv -o data/raw
 ```
+> [!warning]
+> - If the `make` command doesn't work, install [`virtualenvwrapper`](https://virtualenvwrapper.readthedocs.io/en/latest/)
+> - If you have any problem with running the `workon` command, please refer to this [post](https://stackoverflow.com/questions/21928555/virtualenv-workon-command-not-found).
 
 ## 📚 Documentation
 In this project, we split the Jupyter notebook located in `notebooks/main.ipynb` into manageable, clean, and easy-to-read code throughout the codebase.
@@ -78,6 +81,10 @@ First we tackled the data cleaning part of the notebook, where we placed data ge
 Training code in the Jupyter notebook file was structured inconsistently, so we decided to refactor it significantly. Starting off, the `xgboost` model was included in our MLFlow setup. The Logistic Regression model was already utilizing MLFlow, so we followed the code in the Logistic Regression notebook cell and recreated it in the `xgboost` portion of the code.
 
 After the training code, we implemented the functionality of selecting the best-performing model after training runs have finished. For this process, we decided to refactor the code in the notebook to use strictly MLFlow for the performance data of our trained models.
+
+Finally, we leveraged our organized codebase to write Dagger functions. The biggest benefits were code consistency and reliability, which enabled us to build the Dagger pipeline quickly and correctly.
+
+To conclude, we consolidated our work into a GitHub Action. Its sole purpose was to train the best-performing model and test it using the inference action specified in the project description.
 
 ## ⚙️ Commands & Options
 ### `train.py`
@@ -107,8 +114,6 @@ python itu_sdse_project/features.py
 ```
 
 ## 🤖 Dagger Automation
-![[Pasted image 20251123132816.png]]
-
 ### `BuildEnv`
 Builds the environment using `python:3.12.2-bookworm` Docker image, installs python dependencies, dvc, and pulls raw data.
 
@@ -123,6 +128,8 @@ Selects the model with the highest f1-score from all training runs, and register
 
 ### `Download`
 Downloads the best performing model as a `model.pkl` artifact.
+> [!info]
+> To run any of the commands type `dagger call <command>` from the project root directory
 
 ## ✅ Project requirements checklist
 - [x] Remove unused code and misleading comments
@@ -135,6 +142,17 @@ Downloads the best performing model as a `model.pkl` artifact.
 - [x] Presence of a workflow that trains the model
 - [x] Presence of a workflow that tests the model
 - [x] Orchestration of dagger workflow through gh actions
+
+## Contributions
+**Jan Nahalka**
+- Jupyter Notebook Decomposition
+- Dagger workflow
+- Github actions workflow
+
+**Oliver Souc**
+- Cookiecutter template setup
+- README Documentation
+- Testing, logging
 
 ## Todos - NOT PART OF README.md
 - Asserts in the project
@@ -149,6 +167,8 @@ Right now the model inference is in the file `itu_sdse_project/modeling/selectio
 
 ### TODO: Fix the warning logs shown while training models
 When running a train script for logistic regression model, the command line prints out warnings ranging from unfit parameter values to lack of configuration definition in mlflow. Check this for both models.
+
+### TODO: Dagger logging + asserts
 
 ![[Pasted image 20251120233321.png]]
 
